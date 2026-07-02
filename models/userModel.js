@@ -136,6 +136,20 @@ const updatePassword = async (email, password) => {
     );
 };
 
+const getAllUsers = async () => {
+
+    const sql = `
+        SELECT
+           *
+        FROM users
+        ORDER BY id DESC
+    `;
+
+    const [rows] = await db.query(sql);
+
+    return rows;
+};
+
 module.exports = {
     findByEmail,
     updateForgotOtp,
@@ -147,5 +161,6 @@ module.exports = {
     createGoogleUser,
     findByMobile,
     activateUser,
-    updateOtp
+    updateOtp,
+    getAllUsers
 };

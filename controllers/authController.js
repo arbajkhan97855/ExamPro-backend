@@ -422,6 +422,39 @@ const resetPassword = async (req, res) => {
     });
 
 };
+
+
+const getAllUsers = async (req, res) => {
+
+    try {
+
+        const users = await User.getAllUsers();
+
+        res.json({
+
+            success: true,
+
+            total: users.length,
+
+            users
+
+        });
+
+    } catch (error) {
+
+        console.log(error);
+
+        res.status(500).json({
+
+            success: false,
+
+            message: "Internal Server Error"
+
+        });
+
+    }
+
+};
 module.exports = {
     verifyOtp,
     signup,
@@ -429,5 +462,6 @@ module.exports = {
     googleLogin,
     forgotPassword,
     verifyForgotOtp,
-    resetPassword 
+    resetPassword ,
+    getAllUsers
 };
