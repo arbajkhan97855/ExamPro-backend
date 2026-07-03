@@ -4,7 +4,8 @@ const jwt = require("jsonwebtoken")
 const User = require("../models/userModel");
 
 const signup = async (req, res) => {
-
+    try {
+        
     const { fullname, email, mobile, password, confirmPassword } = req.body;
 
     if (!fullname || !email || !mobile || !password || !confirmPassword) {
@@ -65,6 +66,15 @@ const signup = async (req, res) => {
         success: true,
         message: "OTP sent to your email"
     });
+    } catch (error) {
+        console.log("Signup Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: error.message || "Internal Server Error"
+        });
+    }
+
 };
 
 
