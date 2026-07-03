@@ -179,9 +179,9 @@ const login = async (req, res) => {
 
 const verifyOtp = async (req, res) => {
     try {
-        const { mobile, otp } = req.body;
+        const { email, otp } = req.body;
 
-        const user = await User.findByMobile(mobile);
+        const user = await User.findByEmail(email);
 
         if (user.length === 0) {
             return res.json({ success: false, message: "User not found" });
@@ -197,24 +197,22 @@ const verifyOtp = async (req, res) => {
             return res.json({ success: false, message: "OTP expired" });
         }
 
-        await User.activateUser(mobile);
+        await User.update(
+            `UPDATE users SET status='active', otp=NULL, otp_expire=NULL WHERE email=?`,
+            [email]
+        );
 
-        res.json({
+        return res.json({
             success: true,
             message: "Account verified successfully"
         });
 
     } catch (error) {
-        res.status(500).json({
-
+        return res.status(500).json({
             success: false,
-
             message: "Internal Server Error"
-
-        })
+        });
     }
-
-
 };
 
 const googleLogin = async (req, res) => {
