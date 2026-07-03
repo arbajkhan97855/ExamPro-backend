@@ -2,6 +2,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
 
 const User = require("../models/userModel");
+  const sendOTPEmail = require("../utils/mail");
 
 const signup = async (req, res) => {
     try {
@@ -36,8 +37,8 @@ const signup = async (req, res) => {
         // Account inactive hai -> sirf OTP update karo
         await User.updateOtp(email, otp, otpExpire);
 
-        // const sendOTPEmail = require("../utils/mail");
-        // await sendOTPEmail(email, otp);
+      
+        await sendOTPEmail(email, otp);
 
         return res.json({
             success: true,
@@ -59,8 +60,8 @@ const signup = async (req, res) => {
         "inactive"
     );
 
-    // const sendOTPEmail = require("../utils/mail");
-    // await sendOTPEmail(email, otp);
+
+    await sendOTPEmail(email, otp);
 
     res.json({
         success: true,
