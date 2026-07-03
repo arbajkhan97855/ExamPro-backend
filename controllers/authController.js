@@ -197,10 +197,7 @@ const verifyOtp = async (req, res) => {
             return res.json({ success: false, message: "OTP expired" });
         }
 
-        await User.update(
-            `UPDATE users SET status='active', otp=NULL, otp_expire=NULL WHERE email=?`,
-            [email]
-        );
+        await User.activateUser(email);
 
         return res.json({
             success: true,

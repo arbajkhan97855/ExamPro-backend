@@ -94,12 +94,12 @@ const findByMobile = async (mobile) => {
 };
 
 // Activate user
-const activateUser = async (mobile) => {
+const activateUser = async (email) => {
     await db.query(
         `UPDATE users 
          SET status = 'active', otp = NULL, otp_expire = NULL 
-         WHERE mobile = ?`,
-        [mobile]
+         WHERE email = ?`,
+        [email]
     );
 };
 
