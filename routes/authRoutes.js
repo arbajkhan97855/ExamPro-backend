@@ -20,4 +20,25 @@ router.post("/reset-password", resetPassword);
 
 router.get("/users", getAllUsers);
 
+const sendOTPEmail = require("./utils/mail");
+
+app.get("/test-mail", async (req, res) => {
+    try {
+
+        await sendOTPEmail(
+            "pathanarbaj03328@gmail.com",
+            "123456"
+        );
+
+        res.send("Mail Sent");
+
+    } catch (err) {
+
+        console.log(err);
+
+        res.status(500).send(err.message);
+
+    }
+});
+
 module.exports = router;
