@@ -30,6 +30,8 @@ app.get("/",(req,res)=>{
 
 });
 
+const sendOTPEmail = require("./utils/mail");
+
 app.get("/test-mail", async (req, res) => {
     try {
 
