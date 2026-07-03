@@ -1,30 +1,29 @@
 const nodemailer = require("nodemailer");
 
+const transporter = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
 const sendOTPEmail = async (email, otp) => {
 
-    const transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: process.env.EMAIL_USER,
-            pass: process.env.EMAIL_PASS
-        }
-    });
-
-    const mailOptions = {
+    await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
         subject: "ExamPro OTP Verification",
         html: `
-            <div style="font-family:Arial;padding:20px">
-                <h2>ExamPro OTP Verification</h2>
-                <p>Your OTP is:</p>
-                <h1 style="color:#4a90e2">${otp}</h1>
-                <p>This OTP is valid for 5 minutes.</p>
-            </div>
+            <h2>Your OTP</h2>
+            <h1>${otp}</h1>
+            <p>Valid for 5 minutes.</p>
         `
-    };
+    });
 
-    await transporter.sendMail(mailOptions);
 };
 
 module.exports = sendOTPEmail;
