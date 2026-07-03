@@ -3,26 +3,33 @@ const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
   host: process.env.EMAIL_HOST,
-  port: 465,
-  secure: true,
+  port: Number(process.env.EMAIL_PORT),
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
-  connectionTimeout: 60000,
-  greetingTimeout: 60000,
-  socketTimeout: 60000,
 });
 
-transporter.verify((err, success) => {
-  console.log("Verify:", err || success);
+transporter.verify((err) => {
+  if (err) {
+    console.error("SMTP Error:", err);
+  } else {
+    console.log("✅ Brevo SMTP Connected");
+  }
 });
 
-module.exports = async (email, otp) => {
+async function sendOTPEmail(email, otp) {
   return transporter.sendMail({
     from: `"ExamPro" <${process.env.EMAIL_FROM}>`,
     to: email,
-    subject: "OTP",
-    html: `<h1>${otp}</h1>`,
+    subject: "ExamPro OTP Verification",
+    html: `
+      <h2>ExamPro OTP Verification</h2>
+      <h1>${otp}</h1>
+      <p>Your OTP is valid for 5 minutes.</p>
+    `,
   });
-};
+}
+
+module.exports = sendOTPEmail;
