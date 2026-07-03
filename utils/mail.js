@@ -1,26 +1,33 @@
+const dns = require("dns");
+
+// Force Node.js to use IPv4 first
+dns.setDefaultResultOrder("ipv4first");
+
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-    service: "gmail",
     host: "smtp.gmail.com",
     port: 587,
-    secure: false,
+    secure: false, // 587 ke liye false
     requireTLS: true,
-    family: 4, // Force IPv4
+    family: 4,
+
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
+
     connectionTimeout: 30000,
     greetingTimeout: 30000,
     socketTimeout: 30000
 });
 
-transporter.verify((err) => {
+// SMTP Connection Check
+transporter.verify((err, success) => {
     if (err) {
-        console.error("SMTP Error:", err.message);
+        console.error("SMTP Verify Error:", err);
     } else {
-        console.log("SMTP Server Ready");
+        console.log("✅ SMTP Server Ready");
     }
 });
 
@@ -31,16 +38,17 @@ const sendOTPEmail = async (email, otp) => {
             to: email,
             subject: "ExamPro OTP Verification",
             html: `
-                <h2>Your OTP</h2>
+                <h2>ExamPro OTP Verification</h2>
                 <h1>${otp}</h1>
-                <p>Valid for 5 minutes.</p>
+                <p>This OTP is valid for 5 minutes.</p>
             `
         });
 
-        console.log("Mail Sent:", info.messageId);
+        console.log("✅ Mail Sent:", info.messageId);
+        return info;
 
     } catch (error) {
-        console.error("Send Mail Error:", error);
+        console.error("❌ Send Mail Error:", error);
         throw error;
     }
 };
