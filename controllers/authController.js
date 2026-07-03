@@ -2,71 +2,71 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken")
 
 const User = require("../models/userModel");
-  const sendOTPEmail = require("../utils/mail");
+
 
 const signup = async (req, res) => {
     try {
-        
-    const { fullname, email, mobile, password, confirmPassword } = req.body;
 
-    if (!fullname || !email || !mobile || !password || !confirmPassword) {
-        return res.json({ success: false, message: "All Fields Required" });
-    }
+        const { fullname, email, mobile, password, confirmPassword } = req.body;
 
-    if (password !== confirmPassword) {
-        return res.json({ success: false, message: "Password Not Match" });
-    }
+        if (!fullname || !email || !mobile || !password || !confirmPassword) {
+            return res.json({ success: false, message: "All Fields Required" });
+        }
 
-    // OTP Generate (YE YAHAN HONA CHAHIYE)
-    const otp = Math.floor(100000 + Math.random() * 900000);
-    const otpExpire = new Date(Date.now() + 5 * 60 * 1000);
+        if (password !== confirmPassword) {
+            return res.json({ success: false, message: "Password Not Match" });
+        }
 
-    const user = await User.checkEmail(email);
+        // OTP Generate (YE YAHAN HONA CHAHIYE)
+        const otp = Math.floor(100000 + Math.random() * 900000);
+        const otpExpire = new Date(Date.now() + 5 * 60 * 1000);
 
-    // Agar email already hai
-    if (user.length > 0) {
+        const user = await User.checkEmail(email);
 
-        // Account active hai
-        if (user[0].status === "active") {
+        // Agar email already hai
+        if (user.length > 0) {
+
+            // Account active hai
+            if (user[0].status === "active") {
+                return res.json({
+                    success: false,
+                    message: "Email Already Registered"
+                });
+            }
+
+            // Account inactive hai -> sirf OTP update karo
+            await User.updateOtp(email, otp, otpExpire);
+
+            const sendOTPEmail = require("../utils/mail");
+            await sendOTPEmail(email, otp);
+
             return res.json({
-                success: false,
-                message: "Email Already Registered"
+                success: true,
+                message: "New OTP sent to your email"
             });
         }
 
-        // Account inactive hai -> sirf OTP update karo
-        await User.updateOtp(email, otp, otpExpire);
+        // Password Hash
+        const hashPassword = await bcrypt.hash(password, 10);
 
-      
+        // New User Create
+        await User.createUser(
+            fullname,
+            email,
+            mobile,
+            hashPassword,
+            otp,
+            otpExpire,
+            "inactive"
+        );
+
+        const sendOTPEmail = require("../utils/mail");
         await sendOTPEmail(email, otp);
 
-        return res.json({
+        res.json({
             success: true,
-            message: "New OTP sent to your email"
+            message: "OTP sent to your email"
         });
-    }
-
-    // Password Hash
-    const hashPassword = await bcrypt.hash(password, 10);
-
-    // New User Create
-    await User.createUser(
-        fullname,
-        email,
-        mobile,
-        hashPassword,
-        otp,
-        otpExpire,
-        "inactive"
-    );
-
-
-    await sendOTPEmail(email, otp);
-
-    res.json({
-        success: true,
-        message: "OTP sent to your email"
-    });
     } catch (error) {
         console.log("Signup Error:", error);
 
@@ -116,12 +116,12 @@ const login = async (req, res) => {
 
         }
 
-     if (user[0].status !== "active") {
-    return res.json({
-        success: false,
-        message: "Please verify OTP first"
-    });
-}
+        if (user[0].status !== "active") {
+            return res.json({
+                success: false,
+                message: "Please verify OTP first"
+            });
+        }
         const token = jwt.sign(
 
             {
@@ -178,31 +178,43 @@ const login = async (req, res) => {
 };
 
 const verifyOtp = async (req, res) => {
+    try {
+        const { mobile, otp } = req.body;
 
-    const { mobile, otp } = req.body;
+        const user = await User.findByMobile(mobile);
 
-    const user = await User.findByMobile(mobile);
+        if (user.length === 0) {
+            return res.json({ success: false, message: "User not found" });
+        }
 
-    if (user.length === 0) {
-        return res.json({ success: false, message: "User not found" });
+        const dbUser = user[0];
+
+        if (dbUser.otp != otp) {
+            return res.json({ success: false, message: "Invalid OTP" });
+        }
+
+        if (new Date() > new Date(dbUser.otp_expire)) {
+            return res.json({ success: false, message: "OTP expired" });
+        }
+
+        await User.activateUser(mobile);
+
+        res.json({
+            success: true,
+            message: "Account verified successfully"
+        });
+
+    } catch (error) {
+        res.status(500).json({
+
+            success: false,
+
+            message: "Internal Server Error"
+
+        })
     }
 
-    const dbUser = user[0];
 
-    if (dbUser.otp != otp) {
-        return res.json({ success: false, message: "Invalid OTP" });
-    }
-
-    if (new Date() > new Date(dbUser.otp_expire)) {
-        return res.json({ success: false, message: "OTP expired" });
-    }
-
-    await User.activateUser(mobile);
-
-    res.json({
-        success: true,
-        message: "Account verified successfully"
-    });
 };
 
 const googleLogin = async (req, res) => {
@@ -473,6 +485,6 @@ module.exports = {
     googleLogin,
     forgotPassword,
     verifyForgotOtp,
-    resetPassword ,
+    resetPassword,
     getAllUsers
 };
