@@ -2,6 +2,10 @@ const dns = require("dns");
 
 // Force Node.js to use IPv4 first
 dns.setDefaultResultOrder("ipv4first");
+require("dotenv").config();
+
+console.log("EMAIL_USER:", process.env.EMAIL_USER);
+console.log("EMAIL_PASS:", process.env.EMAIL_PASS ? "Loaded ✅" : "Not Loaded ❌");
 
 const nodemailer = require("nodemailer");
 
