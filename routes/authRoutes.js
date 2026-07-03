@@ -20,7 +20,7 @@ router.post("/reset-password", resetPassword);
 
 router.get("/users", getAllUsers);
 
-const sendOTPEmail = require("./utils/mail");
+
 
 
 
