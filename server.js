@@ -23,8 +23,10 @@ app.use(express.urlencoded({
 }));
 
 const authRoutes = require("./routes/authRoutes");
+const studentRoutes = require("./routes/studentRoutes");
 
 app.use("/api/auth", authRoutes);
+app.use("/api/student", studentRoutes);
 
 app.get("/",(req,res)=>{
 
