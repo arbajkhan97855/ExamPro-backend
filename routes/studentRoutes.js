@@ -5,11 +5,14 @@ const router = express.Router();
 const authMiddleware = require("../middleware/authMiddleware");
 
 const {
-    getProfile
+    getProfile,
+    getMyExams
 } = require("../controllers/studentController");
 
 
+// ==========================
 // Student Profile
+// ==========================
 
 router.get(
     "/profile",
@@ -17,5 +20,15 @@ router.get(
     getProfile
 );
 
+
+// ==========================
+// My Purchased Exams
+// ==========================
+
+router.get(
+    "/my-exams",
+    authMiddleware,
+    getMyExams
+);
 
 module.exports = router;

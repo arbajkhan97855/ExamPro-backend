@@ -24,9 +24,11 @@ app.use(express.urlencoded({
 
 const authRoutes = require("./routes/authRoutes");
 const studentRoutes = require("./routes/studentRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/student", studentRoutes);
+app.use("/api/payment", paymentRoutes);
 
 app.get("/",(req,res)=>{
 
