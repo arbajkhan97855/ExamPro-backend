@@ -15,6 +15,13 @@ router.post(
     createPaymentOrder
 );
 
+router.get("/test", (req, res) => {
+    res.json({
+        success: true,
+        message: "Payment Route Working"
+    });
+});
+
 router.post(
     "/verify",
     authMiddleware,
