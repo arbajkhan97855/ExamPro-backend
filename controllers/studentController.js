@@ -50,23 +50,31 @@ const getMyExams = async (req, res) => {
         const [rows] = await pool.execute(
 
             `SELECT
+                id,
                 exam_slug,
                 exam_name,
                 amount,
-                payment_date,
-                razorpay_payment_id
+                currency,
+                payment_method,
+                razorpay_order_id,
+                razorpay_payment_id,
+                status,
+                created_at,
+                paid_at
             FROM payments
             WHERE user_id = ?
-            AND status='paid'
-            ORDER BY payment_date DESC`,
+            AND status = 'paid'
+            ORDER BY paid_at DESC, created_at DESC`,
 
             [userId]
 
         );
 
-        return res.json({
+        return res.status(200).json({
 
             success: true,
+
+            count: rows.length,
 
             exams: rows
 
@@ -74,13 +82,16 @@ const getMyExams = async (req, res) => {
 
     } catch (error) {
 
-        console.log(error);
+        console.error(
+            "Get My Exams Error:",
+            error
+        );
 
         return res.status(500).json({
 
             success: false,
 
-            message: "Internal Server Error"
+            message: "Unable to fetch purchased exams"
 
         });
 
